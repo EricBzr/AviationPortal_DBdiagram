@@ -1,0 +1,225 @@
+
+Table auth_user {
+  id int [pk, not null, increment]
+  password varchar(128) [not null]
+  last_login datetime
+  is_superuser bool [not null]
+  username varchar(150) [not null, unique]
+  first_name varchar(30) [not null]
+  email varchar(254) [not null]
+  is_staff bool [not null]
+  is_active bool [not null]
+  date_joined datetime [not null]
+  last_name varchar(150) [not null]
+}
+
+Table users_profile {
+  id int [pk, not null, increment]
+  user_id int [not null, ref: - auth_user.id]
+  
+  // Basic Contact Information
+  user_prof_type user_types [not null]
+  title varchar(50) 
+  about_me_description text
+  location varchar(100)
+  linked_in_url varchar(100)
+  photo blob
+  
+  // Contact Information
+  street_address varchar(50)
+  lodging_address varchar(50)
+  city varchar(30)
+  state varchar(30)
+  zip int 
+  phone_number int
+  website varchar(150)
+}
+
+Enum user_types {
+  job_seeker
+  employer
+}
+
+Table education {
+  id int [pk, not null, increment]
+  user_id int [not null, ref: > users_profile.user_id]
+  school_name varchar(100) [not null]
+  academic_degree degree [not null]
+  field_of_study varchar(100)
+  location varchar(100) [not null]
+  start_month varchar(10) [not null]
+  start_year year [not null]
+  end_month varchar(10) [not null]
+  end_year year [not null]
+  is_currently_attending bool [not null]
+  description text
+  
+}
+
+Enum degree {
+  high_school_diploma
+  associate_degree
+  bachelor_degree
+  master_degree
+  phd
+  md
+  jd
+}
+
+Table experience {
+  id int [pk, not null, increment]
+  user_id int [not null, ref: > users_profile.user_id]
+  employer_name varchar(150) [not null]
+  job_title varchar(150) [not null]
+  country varchar(50) [not null]
+  location varchar(100) [not null]
+  description text [not null]
+  start_month varchar(10) [not null]
+  start_year year [not null]
+  end_month varchar(10) [not null]
+  end_year year [not null]
+  is_currently_employed bool [not null]
+}
+
+Table job_preference {
+  id int [pk, not null, increment]
+  user_id int [not null, ref: - users_profile.user_id]
+  
+  // Salary
+  salary_min int [note: "Rate is per year"]
+  salary_max int [note: "Rate is per year"]
+  
+  job_type job_period_type [note: "Users should be able to pick a combination of types rather than just one. In this regard, field type should be Set"]
+  location varchar(100)
+}
+
+Enum job_period_type {
+  full_time
+  part_time
+  contract
+  internship
+  temporary
+}
+
+Table general_job_title {
+  id int [pk, not null, increment]
+  gen_job_title_id int [not null, ref: > job_preference.id] 
+  title varchar(150) [not null]
+}
+
+Table skill {
+  id int [pk, not null, increment]
+  user_id int [not null, ref: > users_profile.user_id]
+  skill_name varchar(50) [not null]
+}
+
+Table resume {
+  id int [pk, not null, increment]
+  user_id int [not null, ref: > users_profile.user_id]
+  file blob [not null]
+}
+
+Table job_posting {
+  id int [pk, not null, increment]
+  job_id int [not null, unique, ref: < favorites.job_id]
+  job_title varchar(150) [not null]
+  job_description text [not null]
+  sector_type varchar(50) [not null]
+  company_id int [not null]
+  posting_date datetime [not null]
+  application_deadline datetime [not null]
+  salary_min int [note: "Rate is per year"]
+  salary_max int [note: "Rate is per year"]
+  location_address varchar(100) [not null]
+  us_work_author_required bool [note: "Whether an applicant must be authorized to work in the U.S."]
+  job_type job_period_type [not null]
+}
+
+Table company_profile {
+  id int [pk, not null, increment]
+  company_id int [not null, unique, ref: < job_posting.company_id, ref: < follows.company_id]
+  company_name varchar(100) [not null, unique]
+  company_description text [not null]
+  company_banner blob
+  industry_type varchar(50) [not null]
+  headquarters_location varchar(100) [not null]
+  employee_capacity capacity [not null, note: "The range of the amount of employees in the company"]
+}
+
+Enum capacity {
+  "10 or less"
+  "10 to 50"
+  "50 to 100"
+  "100 to 500"
+  "500 to 1000"
+  "1000 to 10,000"
+  "10,000 to 50,000"
+  "50,000 to 100,000"
+  "100,000 to 500,0000"
+  "500,000 to 1,000,000"
+  "1,000,000+"
+}
+
+Table follows {
+  id int [pk, not null, increment]
+  user_id int [not null, unique, ref: > users_profile.user_id]
+  company_id int [not null]
+} 
+
+Table favorites {
+  id int [pk, not null, increment]
+  user_id int [not null, unique, ref: > users_profile.user_id]
+  job_id int [not null]
+}
+
+Table message {
+  id int [pk, not null, increment]
+  sender_id int [not null, ref: > users_profile.user_id]
+  subject varchar(100)
+  message_text text [not null]
+  date_sent datetime [not null]
+  is_draft bool [not null]
+  was_read bool [not null]
+}
+
+Table notification {
+  id int [pk, not null, increment]
+  notification_id int [not null, unique, ref: < notification_sent_to.notification_id]
+  category notification_category [not null]
+  recipient_id int [not null]
+  was_read bool [not null]
+}
+
+Enum notification_category {
+  Event
+  Notice
+  Application
+  Job
+  News
+}
+
+Table news_article {
+  id type [pk, not null, increment]
+  company_id type [not null]
+  category news_category [not null]
+  article_text type [not null]
+  is_draft bool [not null]
+}
+
+Enum news_category {
+  Event
+  Job
+  News
+}
+
+Table message_sent_to {
+  id type [pk, not null, increment]
+  sender_id int [not null, ref: > message.sender_id]
+  recipient_id type [not null, ref: > users_profile.user_id]
+}
+
+Table notification_sent_to {
+  id type [pk, not null, increment]
+  notification_id type [not null]
+  recipient_id type [not null, ref: > users_profile.user_id]
+}
