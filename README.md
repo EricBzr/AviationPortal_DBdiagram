@@ -1,5 +1,5 @@
-# AviationPortal_DBdiagram
-A repository that holds a diagram of our web platform's ideal database schema's &amp; relationships
+# Purpose
+This repository will serve to hold a diagram of our web platform's ideal database schema's &amp; relationships
 
 # Notes on Making Edits/Commits
 The contents of this repo should contain a single text file called "aviation-diagram.txt" with our diagram's dbdiagram.io relevant code. The code should look like this:
